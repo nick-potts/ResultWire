@@ -1,6 +1,6 @@
 {
   "name": "resultwire",
-  "version": "0.2.2",
+  "version": "1.0.0dd",
   "description": "Rust-like Result types, easily serialized over the wire",
   "sideEffects": false,
   "main": "dist/index.js",
