@@ -98,7 +98,9 @@ export function map<T, U, E>(
   result: Result<T, E>,
   f: (value: T) => U,
 ): Result<U, E> {
-  return isOk(result) ? ok(f(result.value)) : result;
+  return isOk(result)
+    ? ok(f(result.value))
+    : result;
 }
 
 /**
@@ -120,7 +122,9 @@ export function mapErr<T, E, F>(
   result: Result<T, E>,
   f: (error: E) => F,
 ): Result<T, F> {
-  return isErr(result) ? err(f(result.error)) : result;
+  return isErr(result)
+    ? err(f(result.error))
+    : result;
 }
 
 /**
@@ -139,7 +143,9 @@ export function mapErr<T, E, F>(
  * ```
  */
 export function unwrapOr<T, E>(result: Result<T, E>, defaultValue: T): T {
-  return isOk(result) ? result.value : defaultValue;
+  return isOk(result)
+    ? result.value :
+    defaultValue;
 }
 
 /**
@@ -161,7 +167,9 @@ export function andThen<T, U, E>(
   result: Result<T, E>,
   f: (value: T) => Result<U, E>,
 ): Result<U, E> {
-  return isOk(result) ? f(result.value) : result;
+  return isOk(result)
+    ? f(result.value)
+    : result;
 }
 
 /**
@@ -183,7 +191,9 @@ export async function asyncAndThen<T, U, E>(
   result: Result<T, E>,
   f: (value: T) => Promise<Result<U, E>>,
 ): Promise<Result<U, E>> {
-  return isOk(result) ? await f(result.value) : result;
+  return isOk(result)
+    ? await f(result.value)
+    : result;
 }
 
 /**
@@ -205,7 +215,9 @@ export function orElse<T, E, F>(
   result: Result<T, E>,
   f: (error: E) => Result<T, F>,
 ): Result<T, F> {
-  return isErr(result) ? f(result.error) : result;
+  return isErr(result)
+    ? f(result.error)
+    : result;
 }
 
 /**
@@ -229,7 +241,9 @@ export function match<T, E, U>(
   okFn: (value: T) => U,
   errFn: (error: E) => U,
 ): U {
-  return isOk(result) ? okFn(result.value) : errFn(result.error);
+  return isOk(result)
+    ? okFn(result.value)
+    : errFn(result.error);
 }
 
 export async function asyncMatch<T, E, U>(
@@ -237,7 +251,9 @@ export async function asyncMatch<T, E, U>(
   okFn: (value: T) => Promise<U>,
   errFn: (error: E) => Promise<U>,
 ): Promise<U> {
-  return isOk(result) ? await okFn(result.value) : await errFn(result.error);
+  return isOk(result)
+    ? await okFn(result.value)
+    : await errFn(result.error);
 }
 
 /**
@@ -259,7 +275,9 @@ export async function asyncMap<T, U, E>(
   result: Result<T, E>,
   f: (value: T) => Promise<U>,
 ): Promise<Result<U, E>> {
-  return isOk(result) ? ok(await f(result.value)) : result;
+  return isOk(result)
+    ? ok(await f(result.value))
+    : result;
 }
 
 /**
@@ -336,7 +354,9 @@ export function combineWithAllErrors<T, E>(
       errors.push(result.error);
     }
   }
-  return errors.length === 0 ? ok(values) : err(errors);
+  return errors.length === 0
+    ? ok(values)
+    : err(errors);
 }
 
 /**
