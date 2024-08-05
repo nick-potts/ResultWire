@@ -53,7 +53,7 @@ Creates a new ```Ok``` result.
 **Example:**
 
 ```typescript
-const result = ok(42); // Ok<number>
+const result = ok(42); // Result<number, ?>
 ```
 
 #### ```err<E>(error: E): Err<E>```
@@ -63,7 +63,7 @@ Creates a new ```Err``` result.
 **Example:**
 
 ```typescript
-const result = err('Something went wrong'); // Err<string>
+const result = err('Something went wrong'); // Result<?, string>
 ```
 
 #### ```isOk<T, E>(result: Result<T, E>): result is Ok<T>```
