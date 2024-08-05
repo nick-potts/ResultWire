@@ -1,4 +1,4 @@
-# [ResultsWire](https://github.com/nick-potts/ResultsWire)
+# [ResultWire](https://github.com/nick-potts/ResultWire)
 [![](https://img.shields.io/badge/Powered%20by-jslib%20base-brightgreen.svg)](https://github.com/yanhaijing/jslib-base)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/nick-potts/ResultWire/blob/master/LICENSE)
 [![CI](https://github.com/nick-potts/ResultWire/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/nick-potts/ResultWire/actions/workflows/ci.yml)
