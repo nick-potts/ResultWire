@@ -11,7 +11,9 @@
     "lint": "eslint -c .eslintrc.cjs '**/*.ts'",
     "lint:fix": "eslint --fix -c .eslintrc.cjs '**/*.ts' --fix",
     "prepublishOnly": "npm run build",
-    "build": "tsc"
+    "build": "tsc",
+    "test": "npm run coverage",
+    "coverage": "jest --coverage --config jestconfig.json"
   },
   "author": "nick-potts",
   "license": "MIT",
@@ -58,6 +60,7 @@
     "nyc": "^15.1.0",
     "prettier": "3.1.0",
     "rimraf": "^5.0.5",
+    "ts-jest": "^29.2.4",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   },
