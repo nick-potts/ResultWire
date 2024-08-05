@@ -15,7 +15,7 @@ import {
   fromThrowable,
   combine,
   combineWithAllErrors,
-  safeUnwrap, Result,
+  safeUnwrap,
 } from './index';
 
 import {expect} from 'expect';
@@ -52,8 +52,10 @@ describe('Result', () => {
   });
 
   it('should not map a function over the value of an Err result', () => {
-    const result = err('Something went wrong') as Result<number, string>;
-    const mappedResult = map(result, (value) => value * 2);
+    const result = err('Something went wrong');
+    const mappedResult = map(result, () => {
+      throw new Error('Should not be called')
+    });
     expect(mappedResult).toEqual({ kind: 'err', error: 'Something went wrong' });
   });
 
@@ -67,8 +69,10 @@ describe('Result', () => {
   });
 
   it('should not map a function over the error of an Ok result', () => {
-    const result = ok(42) as Result<number, string>;
-    const mappedResult = mapErr(result, (error) => new Error(error));
+    const result = ok(42)
+    const mappedResult = mapErr(result, () => {
+      throw new Error('Should not be called')
+    });
     expect(mappedResult).toEqual({ kind: 'ok', value: 42 });
   });
 
@@ -91,19 +95,21 @@ describe('Result', () => {
   });
 
   it('should not chain a function to the value of an Err result', () => {
-    const result = err('Something went wrong') as Result<number, string>;
-    const chainedResult = andThen(result, (value) => ok(value * 2));
+    const result = err('Something went wrong');
+    const chainedResult = andThen(result, () => {
+      throw new Error('Should not be called');
+    });
     expect(chainedResult).toEqual({ kind: 'err', error: 'Something went wrong' });
   });
 
   it('should apply a function to the value of an Ok result', () => {
-    const result = ok(42) as Result<number, string>;
+    const result = ok(42);
     const appliedResult = orElse(result, () => ok(0));
     expect(appliedResult).toEqual({ kind: 'ok', value: 42 });
   });
 
   it('should apply a function to the error of an Err result', () => {
-    const result = err('Something went wrong') as Result<number, string>;
+    const result = err('Something went wrong');
     const appliedResult = orElse(result, () => ok(0));
     expect(appliedResult).toEqual({ kind: 'ok', value: 0 });
   });
@@ -113,17 +119,19 @@ describe('Result', () => {
     const matchedValue = match(
       result,
       (value) => value * 2,
-      (error) => 0,
+      () => 0,
     );
     expect(matchedValue).toBe(84);
   });
 
   it('should match the Err variant of a Result', () => {
-    const result = err('Something went wrong') as Result<number, string>;
+    const result = err('Something went wrong');
     const matchedValue = match(
       result,
-      (value) => value * 2,
-      (error) => 0,
+      () => {
+        throw new Error('Should not be called');
+      },
+      () => 0,
     );
     expect(matchedValue).toBe(0);
   });
@@ -137,9 +145,10 @@ describe('Result', () => {
   });
 
   it('should not async chain a function to the value of an Err result', async () => {
-    const result = err('Something went wrong') as Result<number, string>;
-    const chainedResult = await asyncAndThen(result, async (value) =>
-      Promise.resolve(ok(value * 2)),
+    const result = err('Something went wrong');
+    const chainedResult = await asyncAndThen(result, async () => {
+      throw new Error('Should not be called');
+      }
     );
     expect(chainedResult).toEqual({ kind: 'err', error: 'Something went wrong' });
   });
@@ -149,17 +158,19 @@ describe('Result', () => {
     const matchedValue = await asyncMatch(
       result,
       async (value) => Promise.resolve(value * 2),
-      async (error) => Promise.resolve(0),
+      async () => Promise.resolve(0),
     );
     expect(matchedValue).toBe(84);
   });
 
   it('should async match the Err variant of a Result', async () => {
-    const result = err('Something went wrong') as Result<number, string>;
+    const result = err('Something went wrong');
     const matchedValue = await asyncMatch(
       result,
-      async (value) => Promise.resolve(value * 2),
-      async (error) => Promise.resolve(0),
+      async () => {
+        throw new Error('Should not be called');
+      },
+      async () => Promise.resolve(0),
     );
     expect(matchedValue).toBe(0);
   });
@@ -173,9 +184,10 @@ describe('Result', () => {
   });
 
   it('should not async map a function over the value of an Err result', async () => {
-    const result = err('Something went wrong') as Result<number, string>;
-    const mappedResult = await asyncMap(result, async (value) =>
-      Promise.resolve(value * 2),
+    const result = err('Something went wrong');
+    const mappedResult = await asyncMap(result, async () => {
+      throw new Error('Should not be called');
+      },
     );
     expect(mappedResult).toEqual({ kind: 'err', error: 'Something went wrong' });
   });
