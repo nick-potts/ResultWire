@@ -1,7 +1,7 @@
 {
-    "name": "Conveyance",
-    "npmname": "conveyance",
-    "umdname": "conveyance",
+    "name": "ResultWire",
+    "npmname": "resultwire",
+    "umdname": "resultwire",
     "username": "nick-potts",
     "type": "ts",
     "lang": "en",

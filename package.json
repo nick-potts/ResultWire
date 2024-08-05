@@ -17,10 +17,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git://github.com/nick-potts/Conveyance.git"
+    "url": "git://github.com/nick-potts/ResultWire.git"
   },
   "bugs": {
-    "url": "https://github.com/nick-potts/Conveyance/issues"
+    "url": "https://github.com/nick-potts/ResultWire/issues"
   },
   "files": [
     "dist/**/*"
