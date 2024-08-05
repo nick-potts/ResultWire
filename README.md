@@ -6,7 +6,11 @@
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/nick-potts/ResultWire.svg)](http://isitmaintained.com/project/nick-potts/ResultWire "Percentage of issues still open")
 
 
-This library provides a minimal Result type and utility functions inspired by Rust's Result<T, E> enum. It aims to provide better error handling in TypeScript by representing operations that might fail in a type-safe manner.
+This library provides a minimal Result type and utility functions that can be sent over the wire with the design being inspired by Rust's Result<T, E> enum. It aims to provide better error handling in TypeScript by representing operations that might fail in a type-safe manner.
+
+## Serialization
+
+This library is designed to be used with Remix's turbo-stream. The ```Result``` type and its variants (```Ok```, ```Err```) can be serialized and deserialized over the wire, making it suitable for use in client-server communication.
 
 ## Installation
 
@@ -49,7 +53,7 @@ Creates a new ```Ok``` result.
 **Example:**
 
 ```typescript
-const result = ok(42); // Ok<number>
+const result = ok(42); // Result<number, ?>
 ```
 
 #### ```err<E>(error: E): Err<E>```
@@ -59,7 +63,7 @@ Creates a new ```Err``` result.
 **Example:**
 
 ```typescript
-const result = err('Something went wrong'); // Err<string>
+const result = err('Something went wrong'); // Result<?, string>
 ```
 
 #### ```isOk<T, E>(result: Result<T, E>): result is Ok<T>```
@@ -228,9 +232,7 @@ const result = ok(42);
 const unwrappedResult = safeUnwrap(result); // 42
 ```
 
-## Serialization
 
-This library is designed to be used with Remix's turbo-stream. The ```Result``` type and its variants (```Ok```, ```Err```) can be serialized and deserialized over the wire, making it suitable for use in client-server communication.
 
 
 
