@@ -1,12 +1,18 @@
 {
   "name": "resultwire",
-  "version": "1.0.3",
+  "version": "1.4.0",
   "description": "Rust-like Result types, easily serialized over the wire",
   "sideEffects": false,
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "exports": [{
+    "types": "./dist/index.d.ts",
+    "import": "./dist/index.js",
+    "require": "./dist/index.cjs"
+  }],
   "scripts": {
-    "build": "tsc -p .",
+    "build": "tsup",
     "lint": "tslint -p tsconfig.json",
     "doc": "typedoc src",
     "prepublishOnly": "rimraf dist -rf && npm run lint && npm run test && npm run build",
@@ -39,6 +45,7 @@
     "ts-jest": "^29.2.4",
     "ts-loader": "^9.5.1",
     "tslint": "^6.1.3",
+    "tsup": "^8.2.4",
     "typedoc": "^0.26.5",
     "typescript": "^5.5.4"
   },

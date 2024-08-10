@@ -22,7 +22,7 @@ export type Result<T, E> = Ok<T> | Err<E>;
  * const result = ok(42); // Result&lt;number, unknown&gt;
  * ```
  */
-export function ok<T, E>(value: T): Result<T, E> {
+export function ok<T>(value: T): Ok<T> {
   return { kind: 'ok', value };
 }
 
@@ -39,7 +39,7 @@ export function ok<T, E>(value: T): Result<T, E> {
  * const result = err(&#x27;Something went wrong&#x27;); // Result&lt;unknown, string&gt;
  * ```
  */
-export function err<T, E>(error: E): Result<T, E> {
+export function err<E>(error: E): Err<E> {
   return { kind: 'err', error };
 }
 

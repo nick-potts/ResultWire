@@ -1,16 +1,13 @@
 # [ResultWire](https://github.com/nick-potts/ResultWire)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/nick-potts/ResultWire/blob/master/LICENSE)
-[![CI](https://github.com/nick-potts/ResultWire/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/nick-potts/ResultWire/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/badge/npm-0.1.0-orange.svg)](https://www.npmjs.com/package/resultwire)
-[![NPM downloads](http://img.shields.io/npm/dm/ResultWire.svg?style=flat-square)](http://www.npmtrends.com/resultwire)
-[![Percentage of issues still open](http://isitmaintained.com/badge/open/nick-potts/ResultWire.svg)](http://isitmaintained.com/project/nick-potts/ResultWire "Percentage of issues still open")
+[![CI](https://github.com/nick-potts/ResultWire/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/nick-potts/ResultWire/actions/workflows/ci.yml)
+[![Tree Shakable](https://deno.bundlejs.com/badge?q=resultwire@1.4.0&treeshake=[*])](https://bundlejs.com/?q=resultwire&treeshake=[*])
 
-
-This library provides a minimal Result type and utility functions that can be sent over the wire with the design being inspired by Rust's Result<T, E> enum. It aims to provide better error handling in TypeScript by representing operations that might fail in a type-safe manner.
+This library provides a minimal Result type and utility functions that can be sent from server to client with the design being inspired by Rust's Result<T, E> enum. It aims to provide better error handling in TypeScript by representing operations that might fail in a type-safe manner.
 
 ## Serialization
 
-This library is designed to be used with Remix's turbo-stream. The ```Result``` type and its variants (```Ok```, ```Err```) can be serialized and deserialized over the wire, making it suitable for use in client-server communication.
+This library is designed to be used with Remix's turbo-stream. The ```Result``` type and its variants (```Ok```, ```Err```) can be serialized and deserialized over the network, making it suitable for use in client-server communication.
 
 ## Installation
 
