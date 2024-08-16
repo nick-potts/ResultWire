@@ -1,7 +1,7 @@
 # [ResultWire](https://github.com/nick-potts/ResultWire)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/nick-potts/ResultWire/blob/master/LICENSE)
 [![CI](https://github.com/nick-potts/ResultWire/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/nick-potts/ResultWire/actions/workflows/ci.yml)
-[![Tree Shakable](https://deno.bundlejs.com/badge?q=resultwire@1.4.0&treeshake=[*])](https://bundlejs.com/?q=resultwire&treeshake=[*])
+[![Tree Shakable](https://deno.bundlejs.com/badge?q=resultwire&treeshake=[*])](https://bundlejs.com/?q=resultwire&treeshake=[*])
 
 This library provides a minimal Result type and utility functions that can be sent from server to client with the design being inspired by Rust's Result<T, E> enum. It aims to provide better error handling in TypeScript by representing operations that might fail in a type-safe manner.
 
