@@ -1,322 +1,330 @@
+/**
+ * Represents a successful result containing a value.
+ * @template T The type of the successful value.
+ */
 export type Ok<T> = {
   kind: 'ok';
   value: T;
 };
 
+/**
+ * Represents an error result containing an error.
+ * @template E The type of the error.
+ */
 export type Err<E> = {
   kind: 'err';
   error: E;
 };
 
+/**
+ * Represents a result that can be either successful (Ok) or an error (Err).
+ * @template T The type of the successful value.
+ * @template E The type of the error.
+ */
 export type Result<T, E> = Ok<T> | Err<E>;
 
 /**
- * Creates a new `Ok` result.
+ * Creates a successful result.
+ * @template T The type of the successful value.
+ * @param value The value to wrap in a successful result.
+ * @returns An Ok result containing the value.
  *
- * @param value - The value to wrap in an `Ok` result.
- * @returns An `Ok` result containing the provided value.
- *
- * The `ok` function is used to create a new `Result` instance representing a successful operation.
- * It takes a value of type `T` and returns an `Ok` result wrapping that value.
- *
- * Example usage:
- * ```typescript
+ * @example
  * const result = ok(42);
- * ```
+ * // result is now a successful Result containing 42
  */
 export function ok<T>(value: T): Ok<T> {
   return {kind: 'ok', value};
 }
 
 /**
- * Creates a new `Err` result.
+ * Creates an error result.
+ * @template E The type of the error.
+ * @param error The error to wrap in an error result.
+ * @returns An Err result containing the error.
  *
- * @param error - The error to wrap in an `Err` result.
- * @returns An `Err` result containing the provided error.
- *
- * The `err` function is used to create a new `Result` instance representing an error or failure.
- * It takes an error value of type `E` and returns an `Err` result wrapping that error.
- *
- * Example usage:
- * ```typescript
- * const result = err(&#x27;Something went wrong&#x27;);
- * ```
+ * @example
+ * const result = err(new Error("Something went wrong"));
+ * // result is now an error Result containing the error
  */
 export function err<E>(error: E): Err<E> {
   return {kind: 'err', error};
 }
 
 /**
- * Checks if a `Result` is `Ok`.
+ * Checks if a result is successful.
+ * @template T The type of the successful value.
+ * @template E The type of the error.
+ * @param result The result to check.
+ * @returns True if the result is Ok, false otherwise.
  *
- * @param result - The `Result` to check.
- * @returns `true` if the `Result` is `Ok`, `false` otherwise.
- *
- * The `isOk` function is a type guard that checks if a given `Result` is an `Ok` instance.
- * It takes a `Result` and returns `true` if the `Result` is an `Ok`, and `false` otherwise.
- *
- * Example usage:
- * ```typescript
+ * @example
  * const result = ok(42);
  * if (isOk(result)) {
- *   console.log(result.value);
+ *   console.log("The result is successful");
  * }
- * ```
  */
 export function isOk<T, E>(result: Result<T, E>): result is Ok<T> {
   return result.kind === 'ok';
 }
 
 /**
- * Checks if a `Result` is `Err`.
+ * Checks if a result is an error.
+ * @template T The type of the successful value.
+ * @template E The type of the error.
+ * @param result The result to check.
+ * @returns True if the result is Err, false otherwise.
  *
- * @param result - The `Result` to check.
- * @returns `true` if the `Result` is `Err`, `false` otherwise.
- *
- * The `isErr` function is a type guard that checks if a given `Result` is an `Err` instance.
- * It takes a `Result` and returns `true` if the `Result` is an `Err`, and `false` otherwise.
- *
- * Example usage:
- * ```typescript
- * const result = err(&#x27;Something went wrong&#x27;);
+ * @example
+ * const result = err(new Error("Something went wrong"));
  * if (isErr(result)) {
- *   console.error(result.error);
+ *   console.log("The result is an error");
  * }
- * ```
  */
 export function isErr<T, E>(result: Result<T, E>): result is Err<E> {
   return result.kind === 'err';
 }
 
 /**
- * Maps a function over the value of an `Ok` result.
+ * Maps a Result<T, E> to Result<U, E> by applying a function to a contained Ok value,
+ * leaving an Err value untouched.
+ * @template T The type of the original successful value.
+ * @template U The type of the new successful value.
+ * @template E The type of the error.
+ * @param result The result to map.
+ * @param f The function to apply to the successful value.
+ * @returns A new Result with the mapped value if Ok, or the original error if Err.
  *
- * @param result - The `Result` to map over.
- * @param f - The function to apply to the value of the `Ok` result.
- * @returns A new `Result` with the mapped value if the input is `Ok`, or the original `Err` result.
+ * @example
+ * const result = ok(5);
+ * const mappedResult = map(result, x => x * 2);
+ * // mappedResult is now ok(10)
  *
- * The `map` function allows you to transform the value inside an `Ok` result by applying a given function to it.
- * If the input `Result` is an `Ok`, it applies the provided function to the wrapped value and returns a new `Ok` result with the mapped value.
- * If the input `Result` is an `Err`, it returns the `Err` result unchanged.
- *
- * Example usage:
- * ```typescript
- * const result = ok(42);
- * const mappedResult = map(result, value =&gt; value * 2);
- * ```
+ * @example
+ * const result = err("error");
+ * const mappedResult = map(result, x => x * 2);
+ * // mappedResult is still err("error")
  */
-export function map<T, U, E>(result: Result<T, E>, f: (value: T) => U): Result<U, E> {
-  return isOk(result) ? ok(f(result.value)) : result;
+export function map<T, U, E>(
+  result: Result<T, E>,
+  f: (value: T) => U
+): Result<U, E>;
+
+export function map<T, U, E>(
+  result: Result<T, E>,
+  f: (value: T) => Promise<U>
+): Promise<Result<U, E>>;
+
+export function map<T, U, E>(
+  result: Result<T, E>,
+  f: (value: T) => U | Promise<U>
+): Result<U, E> | Promise<Result<U, E>> {
+  if (isOk(result)) {
+    const res = f(result.value);
+    if (res instanceof Promise) {
+      return res.then(ok);
+    } else {
+      return ok(res);
+    }
+  } else {
+    return result;
+  }
 }
 
 /**
- * Maps a function over the error of an `Err` result.
+ * Maps a Result<T, E> to Result<T, F> by applying a function to a contained Err value,
+ * leaving an Ok value untouched.
+ * @template T The type of the successful value.
+ * @template E The type of the original error.
+ * @template F The type of the new error.
+ * @param result The result to map.
+ * @param f The function to apply to the error value.
+ * @returns A new Result with the mapped error if Err, or the original value if Ok.
  *
- * @param result - The `Result` to map over.
- * @param f - The function to apply to the error of the `Err` result.
- * @returns A new `Result` with the mapped error if the input is `Err`, or the original `Ok` result.
+ * @example
+ * const result = err("error");
+ * const mappedResult = mapErr(result, e => new Error(e));
+ * // mappedResult is now err(new Error("error"))
  *
- * The `mapErr` function allows you to transform the error inside an `Err` result by applying a given function to it.
- * If the input `Result` is an `Err`, it applies the provided function to the wrapped error and returns a new `Err` result with the mapped error.
- * If the input `Result` is an `Ok`, it returns the `Ok` result unchanged.
- *
- * Example usage:
- * ```typescript
- * const result = err(&#x27;Something went wrong&#x27;);
- * const mappedResult = mapErr(result, error =&gt; new Error(error));
- * ```
+ * @example
+ * const result = ok(5);
+ * const mappedResult = mapErr(result, e => new Error(e));
+ * // mappedResult is still ok(5)
  */
 export function mapErr<T, E, F>(result: Result<T, E>, f: (error: E) => F): Result<T, F> {
   return isErr(result) ? err(f(result.error)) : result;
 }
 
 /**
- * Unwraps a `Result`, returning the value if it's `Ok`, or a default value if it's `Err`.
+ * Unwraps a result, yielding the content of an Ok. Else, it returns the provided default value.
+ * @template T The type of the successful value.
+ * @template E The type of the error.
+ * @param result The result to unwrap.
+ * @param defaultValue The default value to return if the result is an error.
+ * @returns The value if Ok, or the default value if Err.
  *
- * @param result - The `Result` to unwrap.
- * @param defaultValue - The default value to return if the `Result` is `Err`.
- * @returns The value of the `Ok` result, or the provided default value if the `Result` is `Err`.
- *
- * The `unwrapOr` function allows you to extract the value from an `Ok` result, or return a default value if the `Result` is an `Err`.
- * If the input `Result` is an `Ok`, it returns the wrapped value.
- * If the input `Result` is an `Err`, it returns the provided default value.
- *
- * Example usage:
- * ```typescript
- * const result = ok(42);
+ * @example
+ * const result = ok(5);
  * const value = unwrapOr(result, 0);
- * ```
+ * // value is 5
+ *
+ * @example
+ * const result = err("error");
+ * const value = unwrapOr(result, 0);
+ * // value is 0
  */
 export function unwrapOr<T, E>(result: Result<T, E>, defaultValue: T): T {
   return isOk(result) ? result.value : defaultValue;
 }
 
 /**
- * Chains a function that returns a `Result` to the value of an `Ok` result.
+ * Calls the provided function with the contained value (if Ok),
+ * or returns the error (if Err).
+ * @template T The type of the original successful value.
+ * @template U The type of the new successful value.
+ * @template E The type of the error.
+ * @param result The result to chain.
+ * @param f The function to apply to the successful value.
+ * @returns A new Result from the applied function if Ok, or the original error if Err.
  *
- * @param result - The `Result` to chain from.
- * @param f - The function to chain, which takes the value of the `Ok` result and returns a new `Result`.
- * @returns The `Result` returned by the chained function if the input is `Ok`, or the original `Err` result.
+ * @example
+ * const divide = (x: number): Result<number, string> =>
+ *   x === 0 ? err("Division by zero") : ok(10 / x);
  *
- * The `andThen` function allows you to chain multiple operations that return `Result`s.
- * If the input `Result` is an `Ok`, it applies the provided function to the wrapped value, which should return another `Result`.
- * If the input `Result` is an `Err`, it returns the `Err` result unchanged.
+ * const result = ok(2);
+ * const chainedResult = andThen(result, divide);
+ * // chainedResult is ok(5)
  *
- * Example usage:
- * ```typescript
- * const result = ok(42);
- * const chainedResult = andThen(result, value =&gt; ok(value * 2));
- * ```
+ * const result2 = ok(0);
+ * const chainedResult2 = andThen(result2, divide);
+ * // chainedResult2 is err("Division by zero")
  */
-export function andThen<T, U, E>(result: Result<T, E>, f: (value: T) => Result<U, E>): Result<U, E> {
-  return isOk(result) ? f(result.value) : result;
-}
+export function andThen<T, U, E>(
+  result: Result<T, E>,
+  f: (value: T) => Result<U, E>
+): Result<U, E>;
 
-/**
- * Asynchronously chains a function that returns a `Promise<Result>` to the value of an `Ok` result.
- *
- * @param result - The `Result` to chain from.
- * @param f - The asynchronous function to chain, which takes the value of the `Ok` result and returns a new `Promise<Result>`.
- * @returns A `Promise` that resolves to the `Result` returned by the chained function if the input is `Ok`, or the original `Err` result.
- *
- * The `asyncAndThen` function is similar to `andThen`, but it allows you to chain asynchronous operations that return `Promise<Result>`s.
- * If the input `Result` is an `Ok`, it applies the provided asynchronous function to the wrapped value, which should return a `Promise<Result>`.
- * If the input `Result` is an `Err`, it returns a `Promise` that resolves to the `Err` result.
- *
- * Example usage:
- * ```typescript
- * const result = ok(42);
- * const chainedResult = await asyncAndThen(result, async value =&gt; ok(value * 2));
- * ```
- */
-export async function asyncAndThen<T, U, E>(
+export function andThen<T, U, E>(
   result: Result<T, E>,
   f: (value: T) => Promise<Result<U, E>>
-): Promise<Result<U, E>> {
-  return isOk(result) ? await f(result.value) : result;
+): Promise<Result<U, E>>;
+
+export function andThen<T, U, E>(
+  result: Result<T, E>,
+  f: (value: T) => Result<U, E> | Promise<Result<U, E>>
+): Result<U, E> | Promise<Result<U, E>> {
+  if (isOk(result)) {
+    const res = f(result.value);
+    if (res instanceof Promise) {
+      return res;
+    } else {
+      return res;
+    }
+  } else {
+    return result;
+  }
 }
 
 /**
- * Chains a function that returns a `Result` to the error of an `Err` result.
+ * Calls the provided function with the contained error (if Err),
+ * or returns the success value (if Ok).
+ * @template T The type of the successful value.
+ * @template E The type of the original error.
+ * @template F The type of the new error.
+ * @param result The result to transform.
+ * @param f The function to apply to the error value.
+ * @returns A new Result from the applied function if Err, or the original value if Ok.
  *
- * @param result - The `Result` to chain from.
- * @param f - The function to chain, which takes the error of the `Err` result and returns a new `Result`.
- * @returns The `Result` returned by the chained function if the input is `Err`, or the original `Ok` result.
+ * @example
+ * const result = err("error");
+ * const transformedResult = orElse(result, e => ok(e.length));
+ * // transformedResult is ok(5)
  *
- * The `orElse` function allows you to chain a fallback operation to an `Err` result.
- * If the input `Result` is an `Err`, it applies the provided function to the wrapped error, which should return another `Result`.
- * If the input `Result` is an `Ok`, it returns the `Ok` result unchanged.
- *
- * Example usage:
- * ```typescript
- * const result = err(&#x27;Something went wrong&#x27;);
- * const chainedResult = orElse(result, error =&gt; ok(&#x27;Fallback value&#x27;));
- * ```
+ * const result2 = ok(10);
+ * const transformedResult2 = orElse(result2, e => ok(e.length));
+ * // transformedResult2 is still ok(10)
  */
 export function orElse<T, E, F>(result: Result<T, E>, f: (error: E) => Result<T, F>): Result<T, F> {
   return isErr(result) ? f(result.error) : result;
 }
 
 /**
- * Matches a `Result` against two functions, one for `Ok` and one for `Err`.
+ * Applies the provided function to the contained value (if Ok) or the contained error (if Err).
+ * @template T The type of the successful value.
+ * @template E The type of the error.
+ * @template U The type of the result of both functions.
+ * @param result The result to match against.
+ * @param okFn The function to apply if the result is Ok.
+ * @param errFn The function to apply if the result is Err.
+ * @returns The result of applying the appropriate function.
  *
- * @param result - The `Result` to match.
- * @param okFn - The function to apply if the `Result` is `Ok`.
- * @param errFn - The function to apply if the `Result` is `Err`.
- * @returns The value returned by the matched function.
- *
- * The `match` function allows you to handle both the `Ok` and `Err` cases of a `Result` separately.
- * It takes two functions as arguments: one for handling the `Ok` case and one for handling the `Err` case.
- * If the input `Result` is an `Ok`, it applies the `okFn` to the wrapped value and returns the result.
- * If the input `Result` is an `Err`, it applies the `errFn` to the wrapped error and returns the result.
- *
- * Example usage:
- * ```typescript
- * const result = ok(42);
- * const value = match(
+ * @example
+ * const result = ok(5);
+ * const matched = match(
  *   result,
- *   value =&gt; value * 2,
- *   error =&gt; 0
+ *   value => `Success: ${value}`,
+ *   error => `Error: ${error}`
  * );
- * ```
+ * // matched is "Success: 5"
+ *
+ * @example
+ * const result = err("Something went wrong");
+ * const matched = match(
+ *   result,
+ *   value => `Success: ${value}`,
+ *   error => `Error: ${error}`
+ * );
+ * // matched is "Error: Something went wrong"
  */
-export function match<T, E, U>(result: Result<T, E>, okFn: (value: T) => U, errFn: (error: E) => U): U {
-  return isOk(result) ? okFn(result.value) : errFn(result.error);
-}
+export function match<T, E, U>(
+  result: Result<T, E>,
+  okFn: (value: T) => U,
+  errFn: (error: E) => U
+): U;
 
-/**
- * Asynchronously matches a `Result` against two functions, one for `Ok` and one for `Err`.
- *
- * @param result - The `Result` to match.
- * @param okFn - The asynchronous function to apply if the `Result` is `Ok`.
- * @param errFn - The asynchronous function to apply if the `Result` is `Err`.
- * @returns A `Promise` that resolves to the value returned by the matched function.
- *
- * The `asyncMatch` function is similar to `match`, but it allows you to handle both the `Ok` and `Err` cases asynchronously.
- * It takes two asynchronous functions as arguments: one for handling the `Ok` case and one for handling the `Err` case.
- * If the input `Result` is an `Ok`, it applies the `okFn` to the wrapped value and returns a `Promise` that resolves to the result.
- * If the input `Result` is an `Err`, it applies the `errFn` to the wrapped error and returns a `Promise` that resolves to the result.
- *
- * Example usage:
- * ```typescript
- * const result = ok(42);
- * const value = await asyncMatch(
- *   result,
- *   async value =&gt; value * 2,
- *   async error =&gt; 0
- * );
- * ```
- */
-export async function asyncMatch<T, E, U>(
+export function match<T, E, U>(
   result: Result<T, E>,
   okFn: (value: T) => Promise<U>,
   errFn: (error: E) => Promise<U>
-): Promise<U> {
-  return isOk(result) ? await okFn(result.value) : await errFn(result.error);
-}
+): Promise<U>;
 
-/**
- * Asynchronously maps a function over the value of an `Ok` result.
- *
- * @param result - The `Result` to map over.
- * @param f - The asynchronous function to apply to the value of the `Ok` result.
- * @returns A `Promise` that resolves to a new `Result` with the mapped value if the input is `Ok`, or the original `Err` result.
- *
- * The `asyncMap` function is similar to `map`, but it allows you to apply an asynchronous function to the value of an `Ok` result.
- * If the input `Result` is an `Ok`, it applies the provided asynchronous function to the wrapped value and returns a `Promise` that resolves to a new `Ok` result with the mapped value.
- * If the input `Result` is an `Err`, it returns a `Promise` that resolves to the `Err` result unchanged.
- *
- * Example usage:
- * ```typescript
- * const result = ok(42);
- * const mappedResult = await asyncMap(result, async value =&gt; value * 2);
- * ```
- */
-export async function asyncMap<T, U, E>(
+export function match<T, E, U>(
   result: Result<T, E>,
-  f: (value: T) => Promise<U>
-): Promise<Result<U, E>> {
-  return isOk(result) ? ok(await f(result.value)) : result;
+  okFn: (value: T) => U | Promise<U>,
+  errFn: (error: E) => U | Promise<U>
+): U | Promise<U> {
+  if (isOk(result)) {
+    const res = okFn(result.value);
+    if (res instanceof Promise) {
+      return res;
+    } else {
+      return res;
+    }
+  } else {
+    const res = errFn(result.error);
+    if (res instanceof Promise) {
+      return res;
+    } else {
+      return res;
+    }
+  }
 }
 
 /**
- * Executes a function that may throw an error and returns the result as a `Result`.
+ * Wraps a function that might throw an error in a Result.
+ * @template T The return type of the function.
+ * @template R The type of the error.
+ * @param f The function to wrap.
+ * @returns A Result containing either the function's return value or the caught error.
  *
- * @param f - The function to execute.
- * @returns An `Ok` result containing the return value of the function if it succeeds, or an `Err` result containing the thrown error.
+ * @example
+ * const dangerousFunction = () => {
+ *   if (Math.random() < 0.5) throw new Error("Bad luck");
+ *   return "Success!";
+ * };
  *
- * The `fromThrowable` function allows you to execute a function that may throw an error and convert the result into a `Result`.
- * It takes a function `f` as an argument, which can be either synchronous or asynchronous.
- * If the function `f` executes successfully without throwing an error, it returns an `Ok` result containing the return value of the function.
- * If the function `f` throws an error, it returns an `Err` result containing the thrown error.
- *
- * Example usage:
- * ```typescript
- * const result = fromThrowable(() =&gt; {
- *   // Code that may throw an error
- *   return 42;
- * });
- * ```
+ * const result = fromThrowable(dangerousFunction);
+ * // result is either ok("Success!") or err(Error("Bad luck"))
  */
 export function fromThrowable<T, R>(f: () => T): Result<T, R>;
 export function fromThrowable<T, R>(f: () => Promise<T>): Promise<Result<T, R>>;
@@ -333,38 +341,45 @@ export function fromThrowable<T, R>(f: () => T | Promise<T>): Result<T, R> | Pro
   }
 }
 
-/*
-* Converts a Promise into a Promise<Result>.
-*
-* @param promise - The Promise to convert.
-* @returns A Promise that resolves to an Ok result containing the resolved value of the input Promise, or an Err result containing the rejection reason.
-*
-* The fromPromise function allows you to convert a Promise into a Promise<Result>.
-* It takes a Promise as an argument and returns a new Promise that resolves to a Result.
-* If the input Promise resolves successfully, the returned Promise resolves to an Ok result containing the resolved value.
-* If the input Promise rejects, the returned Promise resolves to an Err result containing the rejection reason.
-*
-* Example usage:
-* typescript * const promise = Promise.resolve(42); * const resultPromise = fromPromise(promise); *
-*/
+/**
+ * Converts a Promise into a Result.
+ * @template T The type of the successful value.
+ * @template E The type of the error.
+ * @param promise The promise to convert.
+ * @returns A Promise that resolves to a Result.
+ *
+ * @example
+ * const asyncOperation = () => Promise.resolve(42);
+ * const result = await fromPromise(asyncOperation());
+ * // result is ok(42)
+ *
+ * @example
+ * const failingAsyncOperation = () => Promise.reject(new Error("Failed"));
+ * const result = await fromPromise(failingAsyncOperation());
+ * // result is err(Error("Failed"))
+ */
 export function fromPromise<T, E>(promise: Promise<T>): Promise<Result<T, E>> {
   return promise.then(ok).catch((error) => err(error));
 }
 
-/*
-* Combines an array of Results into a single Result.
-*
-* @param results - The array of Results to combine.
-* @returns An Ok result containing an array of the values from the input Results if they are all Ok, or the first Err result encountered.
-*
-* The combine function allows you to combine multiple Results into a single Result.
-* It takes an array of Results as an argument and returns a new Result.
-* If all the input Results are Ok, it returns an Ok result containing an array of the values from the input Results.
-* If any of the input Results is an Err, it returns the first Err result encountered.
-*
-* Example usage:
-* typescript * const results = [ok(1), ok(2), ok(3)]; * const combinedResult = combine(results); *
-*/
+/**
+ * Combines an array of Results into a single Result containing an array of values.
+ * If any Result is an Err, the first Err encountered is returned.
+ * @template T The type of the successful values.
+ * @template E The type of the errors.
+ * @param results An array of Results to combine.
+ * @returns A Result containing either an array of all successful values or the first error encountered.
+ *
+ * @example
+ * const results = [ok(1), ok(2), ok(3)];
+ * const combined = combine(results);
+ * // combined is ok([1, 2, 3])
+ *
+ * @example
+ * const results = [ok(1), err("error"), ok(3)];
+ * const combined = combine(results);
+ * // combined is err("error")
+ */
 export function combine<T, E>(results: Result<T, E>[]): Result<T[], E> {
   const values: T[] = [];
   for (const result of results) {
@@ -376,20 +391,24 @@ export function combine<T, E>(results: Result<T, E>[]): Result<T[], E> {
   return ok(values);
 }
 
-/*
-* Combines an array of Results into a single Result, collecting all errors.
-*
-* @param results - The array of Results to combine.
-* @returns An Ok result containing an array of the values from the input Results if they are all Ok, or an Err result containing an array of all the errors.
-*
-* The combineWithAllErrors function is similar to combine, but it collects all the errors from the input Results instead of returning the first Err encountered.
-* It takes an array of Results as an argument and returns a new Result.
-* If all the input Results are Ok, it returns an Ok result containing an array of the values from the input Results.
-* If any of the input Results is an Err, it returns an Err result containing an array of all the errors from the input Results.
-*
-* Example usage:
-* typescript * const results = [ok(1), err('Error 1'), ok(3), err('Error 2')]; * const combinedResult = combineWithAllErrors(results); *
-*/
+/**
+ * Combines an array of Results into a single Result containing an array of values.
+ * If any Results are Err, all errors are collected into an array.
+ * @template T The type of the successful values.
+ * @template E The type of the errors.
+ * @param results An array of Results to combine.
+ * @returns A Result containing either an array of all successful values or an array of all errors.
+ *
+ * @example
+ * const results = [ok(1), ok(2), ok(3)];
+ * const combined = combineWithAllErrors(results);
+ * // combined is ok([1, 2, 3])
+ *
+ * @example
+ * const results = [ok(1), err("error1"), ok(3), err("error2")];
+ * const combined = combineWithAllErrors(results);
+ * // combined is err(["error1", "error2"])
+ */
 export function combineWithAllErrors<T, E>(results: Result<T, E>[]): Result<T[], E[]> {
   const values: T[] = [];
   const errors: E[] = [];
@@ -403,22 +422,24 @@ export function combineWithAllErrors<T, E>(results: Result<T, E>[]): Result<T[],
   return errors.length === 0 ? ok(values) : err(errors);
 }
 
-/*
-* Unwraps a Result, throwing an error if it's Err.
-*
-* @param result - The Result to unwrap.
-* @returns The value of the Ok result.
-* @throws An error if the Result is Err.
-*
-* The unsafeUnwrap function allows you to extract the value from an Ok result, but throws an error if the Result is an Err.
-* It takes a Result as an argument and returns the value wrapped inside the Ok result.
-* If the input Result is an Err, it throws an error.
-*
-* Note: Use this function with caution, as it may throw an error if the Result is an Err.
-*
-* Example usage:
-* typescript * const result = ok(42); * const value = unsafeUnwrap(result); *
-*/
+/**
+ * Unwraps a Result, yielding the content of an Ok. Throws an error if the value is an Err.
+ * @template T The type of the successful value.
+ * @template E The type of the error.
+ * @param result The result to unwrap.
+ * @returns The value if Ok.
+ * @throws Error if the result is an Err.
+ *
+ * @example
+ * const result = ok(5);
+ * const value = unsafeUnwrap(result);
+ * // value is 5
+ *
+ * @example
+ * const result = err("error");
+ * const value = unsafeUnwrap(result);
+ * // Throws an Error: "Attempted to unwrap an Err value"
+ */
 export function unsafeUnwrap<T, E>(result: Result<T, E>): T {
   if (isErr(result)) {
     throw new Error('Attempted to unwrap an Err value');

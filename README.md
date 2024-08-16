@@ -38,11 +38,8 @@ import { ok, err, Result, ... } from 'resultwire'
   - [mapErr](#maperr)
   - [unwrapOr](#unwrapor)
   - [andThen](#andthen)
-  - [asyncAndThen](#asyncandthen)
   - [orElse](#orelse)
   - [match](#match)
-  - [asyncMatch](#asyncmatch)
-  - [asyncMap](#asyncmap)
   - [fromThrowable](#fromthrowable)
   - [fromPromise](#frompromise)
   - [combine](#combine)
@@ -143,16 +140,6 @@ const result = ok(42);
 const chainedResult = andThen(result, (value) => ok(value * 2));
 ```
 
-### asyncAndThen
-
-Asynchronously chains a function that returns a ```Promise<Result>``` to the value of an ```Ok``` result.
-
-**Example:**
-```typescript
-const result = ok(42);
-const chainedResult = await asyncAndThen(result, async (value) => ok(value * 2));
-```
-
 ### orElse
 
 Chains a function that returns a ```Result``` to the error of an ```Err``` result.
@@ -172,27 +159,6 @@ Matches a ```Result``` against two functions, one for ```Ok``` and one for ```Er
 const result = ok(42);
 const matchedResult = match(result, (value) => value * 2, (error) => 0); // 84
 ```
-
-### asyncMatch
-
-Asynchronously matches a ```Result``` against two functions, one for ```Ok``` and one for ```Err```.
-
-**Example:**
-```typescript
-const result = ok(42);
-const matchedResult = await asyncMatch(result, async (value) => value * 2, async (error) => 0); // 84
-```
-
-### asyncMap
-
-Asynchronously maps a function over the value of an ```Ok``` result.
-
-**Example:**
-```typescript
-const result = ok(42);
-const mappedResult = await asyncMap(result, async (value) => value * 2);
-```
-
 ### fromThrowable
 
 Executes a function that may throw an error and returns the result as a ```Result```.

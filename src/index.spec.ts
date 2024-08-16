@@ -9,9 +9,6 @@ import {
   andThen,
   orElse,
   match,
-  asyncAndThen,
-  asyncMatch,
-  asyncMap,
   fromThrowable,
   combine,
   combineWithAllErrors,
@@ -138,7 +135,7 @@ describe('Result', () => {
 
   it('should async chain a function that returns a Promise<Result> to the value of an Ok result', async () => {
     const result = ok(42);
-    const chainedResult = await asyncAndThen(result, async (value) =>
+    const chainedResult = await andThen(result, async (value) =>
       Promise.resolve(ok(value * 2)),
     );
     expect(chainedResult).toEqual({ kind: 'ok', value: 84 });
@@ -146,7 +143,7 @@ describe('Result', () => {
 
   it('should not async chain a function to the value of an Err result', async () => {
     const result = err('Something went wrong');
-    const chainedResult = await asyncAndThen(result, async () => {
+    const chainedResult = await andThen(result, async () => {
         return Promise.reject('Should not be called');
       }
     );
@@ -155,7 +152,7 @@ describe('Result', () => {
 
   it('should async match the Ok variant of a Result', async () => {
     const result = ok(42);
-    const matchedValue = await asyncMatch(
+    const matchedValue = await match(
       result,
       async (value) => Promise.resolve(value * 2),
       async () => Promise.resolve(0),
@@ -165,7 +162,7 @@ describe('Result', () => {
 
   it('should async match the Err variant of a Result', async () => {
     const result = err('Something went wrong');
-    const matchedValue = await asyncMatch(
+    const matchedValue = await match(
       result,
       async () => {
         return Promise.reject('Should not be called');
@@ -177,7 +174,7 @@ describe('Result', () => {
 
   it('should async map a function over the value of an Ok result', async () => {
     const result = ok(42);
-    const mappedResult = await asyncMap(result, async (value) =>
+    const mappedResult = await map(result, async (value) =>
       Promise.resolve(value * 2),
     );
     expect(mappedResult).toEqual({ kind: 'ok', value: 84 });
@@ -185,7 +182,7 @@ describe('Result', () => {
 
   it('should not async map a function over the value of an Err result', async () => {
     const result = err('Something went wrong');
-    const mappedResult = await asyncMap(result, async () => {
+    const mappedResult = await map(result, async () => {
       throw new Error('Should not be called');
       },
     );
