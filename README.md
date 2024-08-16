@@ -23,213 +23,223 @@ import { ok, err, Result, ... } from 'resultwire'
 
 ## API
 
-### Result Type
+## Table of Contents
 
-```typescript
-export type Ok<T> = {
-  kind: 'ok';
-  value: T;
-};
+- [Types](#types)
+  - [Ok](#ok)
+  - [Err](#err)
+  - [Result](#result)
+- [Functions](#functions)
+  - [ok](#ok-1)
+  - [err](#err-1)
+  - [isOk](#isok)
+  - [isErr](#iserr)
+  - [map](#map)
+  - [mapErr](#maperr)
+  - [unwrapOr](#unwrapor)
+  - [andThen](#andthen)
+  - [asyncAndThen](#asyncandthen)
+  - [orElse](#orelse)
+  - [match](#match)
+  - [asyncMatch](#asyncmatch)
+  - [asyncMap](#asyncmap)
+  - [fromThrowable](#fromthrowable)
+  - [fromPromise](#frompromise)
+  - [combine](#combine)
+  - [combineWithAllErrors](#combinewithallerrors)
+  - [unsafeUnwrap](#unsafeunwrap)
 
-export type Err<E> = {
-  kind: 'err';
-  error: E;
-};
+## Types
 
-export type Result<T, E> = Ok<T> | Err<E>;
-```
+### Ok
 
-The ```Result<T, E>``` type represents the result of an operation that may succeed with a value of type ```T``` or fail with an error of type ```E```.
+Represents a successful value wrapped in an ```Ok``` variant.
 
-### Functions
+### Err
 
-#### ```ok(value: T): Ok<T>```
+Represents an error value wrapped in an ```Err``` variant.
+
+### Result
+
+A union type that represents either an ```Ok``` value or an ```Err``` value.
+
+## Functions
+
+### ok
 
 Creates a new ```Ok``` result.
 
 **Example:**
-
 ```typescript
-const result = ok(42); // Result<number, ?>
+const result = ok(42);
 ```
 
-#### ```err<E>(error: E): Err<E>```
+### err
 
 Creates a new ```Err``` result.
 
 **Example:**
-
 ```typescript
-const result = err('Something went wrong'); // Result<?, string>
+const result = err('Something went wrong');
 ```
 
-#### ```isOk<T, E>(result: Result<T, E>): result is Ok<T>```
+### isOk
 
 Checks if a ```Result``` is ```Ok```.
 
 **Example:**
-
 ```typescript
 const result = ok(42);
 const isOkResult = isOk(result); // true
 ```
 
-#### ```isErr<T, E>(result: Result<T, E>): result is Err<E>```
+### isErr
 
 Checks if a ```Result``` is ```Err```.
 
 **Example:**
-
 ```typescript
 const result = err('Something went wrong');
 const isErrResult = isErr(result); // true
 ```
 
-#### ```map<T, U, E>(result: Result<T, E>, f: (value: T) => U): Result<U, E>```
+### map
 
 Maps a function over the value of an ```Ok``` result.
 
 **Example:**
-
 ```typescript
 const result = ok(42);
-const mappedResult = map(result, (value) => value * 2); // Result<number, unknown>
+const mappedResult = map(result, (value) => value * 2);
 ```
 
-#### ```mapErr<T, E, F>(result: Result<T, E>, f: (error: E) => F): Result<T, F>```
+### mapErr
 
 Maps a function over the error of an ```Err``` result.
 
 **Example:**
-
 ```typescript
 const result = err('Something went wrong');
-const mappedResult = mapErr(result, (error) => new Error(error)); // Result<unknown, Error>
+const mappedResult = mapErr(result, (error) => new Error(error));
 ```
 
-#### ```unwrapOr<T, E>(result: Result<T, E>, defaultValue: T): T```
+### unwrapOr
 
 Unwraps a ```Result```, returning the value if it's ```Ok```, or a default value if it's ```Err```.
 
 **Example:**
-
 ```typescript
 const result = ok(42);
 const unwrappedResult = unwrapOr(result, 0); // 42
 ```
 
-#### ```andThen<T, U, E>(result: Result<T, E>, f: (value: T) => Result<U, E>): Result<U, E>```
+### andThen
 
 Chains a function that returns a ```Result``` to the value of an ```Ok``` result.
 
 **Example:**
-
 ```typescript
 const result = ok(42);
-const chainedResult = andThen(result, (value) => ok(value * 2)); // Result<number, unknown>
+const chainedResult = andThen(result, (value) => ok(value * 2));
 ```
 
-#### ```asyncAndThen<T, U, E>(result: Result<T, E>, f: (value: T) => Promise<Result<U, E>>): Promise<Result<U, E>>```
+### asyncAndThen
 
 Asynchronously chains a function that returns a ```Promise<Result>``` to the value of an ```Ok``` result.
 
 **Example:**
-
 ```typescript
 const result = ok(42);
-const chainedResult = await asyncAndThen(result, async (value) => ok(value * 2)); // Result<number, unknown>
+const chainedResult = await asyncAndThen(result, async (value) => ok(value * 2));
 ```
 
-#### ```orElse<T, E, F>(result: Result<T, E>, f: (error: E) => Result<T, F>): Result<T, F>```
+### orElse
 
 Chains a function that returns a ```Result``` to the error of an ```Err``` result.
 
 **Example:**
-
 ```typescript
 const result = err('Something went wrong');
-const chainedResult = orElse(result, (error) => ok('Default value')); // Result<string, unknown>
+const chainedResult = orElse(result, (error) => ok('Default value'));
 ```
 
-#### ```match<T, E, U>(result: Result<T, E>, okFn: (value: T) => U, errFn: (error: E) => U): U```
+### match
 
 Matches a ```Result``` against two functions, one for ```Ok``` and one for ```Err```.
 
 **Example:**
-
 ```typescript
 const result = ok(42);
 const matchedResult = match(result, (value) => value * 2, (error) => 0); // 84
 ```
 
-#### ```asyncMatch<T, E, U>(result: Result<T, E>, okFn: (value: T) => Promise<U>, errFn: (error: E) => Promise<U>): Promise<U>```
+### asyncMatch
 
 Asynchronously matches a ```Result``` against two functions, one for ```Ok``` and one for ```Err```.
 
 **Example:**
-
 ```typescript
 const result = ok(42);
-const matchedResult = await asyncMatch(result, (value) => Promise.resolve(value * 2), (error) => Promise.resolve(0)); // 84
+const matchedResult = await asyncMatch(result, async (value) => value * 2, async (error) => 0); // 84
 ```
 
-#### ```asyncMap<T, U, E>(result: Result<T, E>, f: (value: T) => Promise<U>): Promise<Result<U, E>>```
+### asyncMap
 
 Asynchronously maps a function over the value of an ```Ok``` result.
 
 **Example:**
-
 ```typescript
 const result = ok(42);
-const mappedResult = await asyncMap(result, async (value) => value * 2); // Result<number, unknown>
+const mappedResult = await asyncMap(result, async (value) => value * 2);
 ```
 
-#### ```fromThrowable<T>(f: () => T): Result<T, unknown>```
+### fromThrowable
 
 Executes a function that may throw an error and returns the result as a ```Result```.
 
 **Example:**
-
 ```typescript
 const result = fromThrowable(() => {
   // Code that may throw an error
 });
 ```
 
-#### ```combine<T, E>(results: Result<T, E>[]): Result<T[], E>```
+### fromPromise
+
+Converts a ```Promise``` into a ```Promise<Result>```.
+
+**Example:**
+```typescript
+const promise = Promise.resolve(42);
+const result = await fromPromise(promise);
+```
+
+### combine
 
 Combines an array of ```Result```s into a single ```Result```.
 
 **Example:**
-
 ```typescript
 const results = [ok(1), ok(2), ok(3)];
-const combinedResult = combine(results); // Result<[number, number, number], unknown>
+const combinedResult = combine(results);
 ```
 
-#### ```combineWithAllErrors<T, E>(results: Result<T, E>[]): Result<T[], E[]>```
+### combineWithAllErrors
 
 Combines an array of ```Result```s into a single ```Result```, collecting all errors.
 
 **Example:**
-
 ```typescript
 const results = [ok(1), err('Error 1'), ok(3), err('Error 2')];
-const combinedResult = combineWithAllErrors(results); // Result<[number, number], string[]>
+const combinedResult = combineWithAllErrors(results);
 ```
 
-#### ```unsafeUnwrap<T, E>(result: Result<T, E>): T```
+### unsafeUnwrap
 
 Unwraps a ```Result```, throwing an error if it's ```Err```.
 
 **Example:**
-
 ```typescript
 const result = ok(42);
 const unwrappedResult = unsafeUnwrap(result); // 42
 ```
-
-
-
-
-

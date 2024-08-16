@@ -15,7 +15,7 @@ import {
   fromThrowable,
   combine,
   combineWithAllErrors,
-  safeUnwrap,
+  unsafeUnwrap, fromPromise,
 } from './index';
 
 import {expect} from 'expect';
@@ -96,8 +96,8 @@ describe('Result', () => {
 
   it('should not chain a function to the value of an Err result', () => {
     const result = err('Something went wrong');
-    const chainedResult = andThen(result, () => {
-      throw new Error('Should not be called');
+    const chainedResult = andThen<string, string, string>(result, () => {
+      return err('Should not be called');
     });
     expect(chainedResult).toEqual({ kind: 'err', error: 'Something went wrong' });
   });
@@ -129,7 +129,7 @@ describe('Result', () => {
     const matchedValue = match(
       result,
       () => {
-        throw new Error('Should not be called');
+        return 42;
       },
       () => 0,
     );
@@ -147,7 +147,7 @@ describe('Result', () => {
   it('should not async chain a function to the value of an Err result', async () => {
     const result = err('Something went wrong');
     const chainedResult = await asyncAndThen(result, async () => {
-      throw new Error('Should not be called');
+        return Promise.reject('Should not be called');
       }
     );
     expect(chainedResult).toEqual({ kind: 'err', error: 'Something went wrong' });
@@ -168,7 +168,7 @@ describe('Result', () => {
     const matchedValue = await asyncMatch(
       result,
       async () => {
-        throw new Error('Should not be called');
+        return Promise.reject('Should not be called');
       },
       async () => Promise.resolve(0),
     );
@@ -199,6 +199,18 @@ describe('Result', () => {
 
   it('should create an Err result from a throwable function', () => {
     const result = fromThrowable(() => {
+      throw new Error('Something went wrong');
+    });
+    expect(result.kind).toEqual('err');
+  });
+
+  it('should create an Ok result from an async throwable function', async () => {
+    const result = await fromThrowable(async () => 42);
+    expect(result).toEqual({ kind: 'ok', value: 42 });
+  });
+
+  it('should create an Err result from an async throwable function', async () => {
+    const result = await fromThrowable(async () => {
       throw new Error('Something went wrong');
     });
     expect(result.kind).toEqual('err');
@@ -236,14 +248,32 @@ describe('Result', () => {
 
   it('should safely unwrap an Ok result', () => {
     const result = ok(42);
-    const unwrappedResult = safeUnwrap(result);
+    const unwrappedResult = unsafeUnwrap(result);
     expect(unwrappedResult).toBe(42);
   });
 
   it('should throw an error when unwrapping an Err result', () => {
     const result = err('Something went wrong');
-    expect(() => safeUnwrap(result)).toThrowError(
+    expect(() => unsafeUnwrap(result)).toThrowError(
       'Attempted to unwrap an Err value',
     );
   });
+
+
+  it('should create an Ok result from a promise that resolves', async () => {
+    const result = await fromPromise(Promise.resolve(42));
+    expect(result).toEqual({ kind: 'ok', value: 42 });
+  });
+
+  it('should create an Err result from a promise that rejects', async () => {
+    const result = await fromPromise(Promise.reject('Something went wrong'));
+    expect(result).toEqual({ kind: 'err', error: 'Something went wrong' });
+  });
+
+  it ('should create an Err result from a promise that throws', async () => {
+    const result = await fromPromise(Promise.resolve(() => {
+      throw new Error('Something went wrong');
+    }));
+  });
+
 });
