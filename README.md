@@ -5,9 +5,9 @@
 
 This library provides a minimal Result type and utility functions that can be sent from server to client with the design being inspired by Rust's Result<T, E> enum. It aims to provide better error handling in TypeScript by representing operations that might fail in a type-safe manner.
 
-## Serialization
+## Why another error-as-value library?
 
-This library is designed to be used with Remix's turbo-stream. The ```Result``` type and its variants (```Ok```, ```Err```) can be serialized and deserialized over the network, making it suitable for use in client-server communication.
+ResultWire doesn't use classes, and instead uses plain objects. This means that it can be sent from server to client, and the helper methods can check the actual objects contents, instead of relying on instanceOf methods. Specifically, this library is designed to be used with Remix's turbo-stream. The ```Result``` type and its variants (```Ok```, ```Err```) can be serialized and deserialized over the network, making it suitable for use in client-server communication.
 
 ## Installation
 
@@ -218,7 +218,7 @@ const results = [ok(1), err('Error 1'), ok(3), err('Error 2')];
 const combinedResult = combineWithAllErrors(results); // Result<[number, number], string[]>
 ```
 
-#### ```safeUnwrap<T, E>(result: Result<T, E>): T```
+#### ```unsafeUnwrap<T, E>(result: Result<T, E>): T```
 
 Unwraps a ```Result```, throwing an error if it's ```Err```.
 
@@ -226,7 +226,7 @@ Unwraps a ```Result```, throwing an error if it's ```Err```.
 
 ```typescript
 const result = ok(42);
-const unwrappedResult = safeUnwrap(result); // 42
+const unwrappedResult = unsafeUnwrap(result); // 42
 ```
 
 
